@@ -1,0 +1,4 @@
+1,liu, alta,5
+2,bilbo, baja,3
+3,kiwi, baja,2
+4,lilo, baja,0

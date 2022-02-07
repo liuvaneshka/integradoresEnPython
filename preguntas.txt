@@ -1,0 +1,9 @@
+1, Quién es el máximo goleador histórico del fútbol argentino, alta
+2, ¿Cuál es el futbolista con más presencias?, baja
+3, ¿El arquero con mayor valla invicta?, alta
+4, derivar o integrar cual es facil, alta
+5, ¿Cuál ?, baja
+6, ¿El ?, alta
+7, Quién , alta
+8, ¿presencias?, baja
+9, ¿El?, alta

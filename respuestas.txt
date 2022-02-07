@@ -1,0 +1,9 @@
+1, Ángel Labruna, *Arsenio Erico, Martín Palermo, Carlos Bianchi, Gabriel Batistuta
+2, Ricardo Bochini, Pedro Catalano, Raúl Cascini, *Hugo Gatti
+3, Marcos Croce, Ubaldo Fillol, *Esteban Andrada, Carlos Barisio
+4, ambas, ninguna, *derivar, integrar
+5, *a, b, c, d
+6, a, b*, c, d
+7, a, b, *c, d
+8, a, *b, c, d
+9, a, b, c, *d
