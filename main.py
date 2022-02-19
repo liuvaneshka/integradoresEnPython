@@ -1,181 +1,325 @@
 import csv
-from datetime import datetime
+import datetime
 
 
-# from operator import itemgetter
-
-
-def leer_pedidos(archivo: str):
+def leer_clientes(archivo: str) -> dict:
     datos = list()
-    pedidos: dict = {}
-
+    clientes: dict = {}
+    # El manejo de excepcion lo aplique al verificar que el archivo tenga ya datos cargados
     try:
-        pedidos_csv = open(archivo, newline='', encoding="UTF-8")
+        clientes_csv = open(archivo, newline='', encoding="UTF-8")
     except IOError:
-        print('No hay pedidos cargados')
-        with open(archivo, 'a') as pedidos_csv:
-            pedidos_csv.write('id_pedido, descripción_del_pedido, costo_del_pedido, cantidad de items, '
-                              'categoría_del_pedido, mes, año\n')
+        print('No hay datos cargados')
 
     else:
-        lector = csv.reader(pedidos_csv, delimiter=',')
-        next(lector)
+        lector = csv.reader(clientes_csv, delimiter=',')
         for row in lector:
             datos.append(row)
 
         for dato in datos:
 
-            if int(dato[0]) not in pedidos:
-                pedidos[int(dato[0])] = {'Descripcion': dato[1], 'Costo': int(dato[2]), 'Cantidad': int(dato[3]),
-                                         'Categoria': dato[4], 'Mes': int(dato[5]), 'Año': int(dato[6])}
+            if dato[0] not in clientes:
+                clientes[int(dato[0])] = {'Nombre': dato[1], 'Alta': dato[2], 'Baja': dato[3], 'Plan': dato[4]}
 
-        pedidos_csv.close()
+        clientes_csv.close()
 
-    return pedidos
-
-
-def validar_numero(numero: str) -> bool:
-    numero_validado: bool = False
-
-    if not numero.isnumeric():
-        numero_validado = True
-
-    return numero_validado
+    return clientes
 
 
-def ingresar_pedidos(pedidos: dict) -> dict:
-    numeros = list(map(int, pedidos.keys()))
-    if len(numeros) > 0:
-        numeros.sort()
-        numero_pedido: int = int(numeros[-1]) + 1
-    else:
-        numero_pedido = 1
+def validar_fecha(fecha: str) -> bool:
+    formato = "%d/%m/%Y"
+    # fecha_valida = None
+    try:
+        datetime.datetime.strptime(fecha, formato)
+        fecha_valida = True
+    except ValueError:
+        fecha_valida = False
+        print("Formato invalido debe ser dd/mm/aaaa")
 
-    descripcion: str = input('Ingrese descripcion: ')
-    costo: str = input('Ingrese costo: ')
-    while validar_numero(costo):
-        print("no ingresaste un numero entero positivo: ")
-        costo = input("Ingrese otro costo: ")
-    cantidad: str = input('Ingrese cantidad: ')
-    while validar_numero(cantidad):
-        print("no ingresaste un numero entero positivo: ")
-        cantidad = input("Ingrese otra cantidad: ")
-    categoria: str = input('Ingrese categoria: ')
-    categoria = categoria[0:2:]
-    categoria = categoria.upper()
-    mes: str = datetime.today().strftime('%#m')
-    anio: str = datetime.today().strftime('%Y')
-
-    print(mes, anio)
-
-    with open("pedidos.csv", "a") as archivo:
-
-        archivo.write(
-            str(numero_pedido) + ', ' + descripcion + ', ' + costo + ', ' + cantidad + ', ' + categoria + ', ' + str(
-                mes) + ', ' + str(anio) + '\n')
-
-    pedidos[numero_pedido] = {'Descripcion': descripcion, 'Cantidad': cantidad, 'Categoria': categoria, 'Mes': mes,
-                              'Año': anio}
-
-    return pedidos
+    return fecha_valida
 
 
-def mostrar_por_annio_mes(pedidos: dict) -> None:
-    suma: int = 0
-    cantidad_pedidos: int = 0
-    lista_m: list = []
-    anio: str = input('Ingrese anio: ')
-    while validar_numero(anio):
-        print("no ingresaste un numero entero positivo: ")
-        anio = input("Ingrese otro costo: ")
-    for i in pedidos:
+def validar_fecha_posterior(fecha_inicial: str, fecha_final: str) -> bool:
+    anterior = datetime.datetime.strptime(fecha_inicial, "%d/%m/%Y")
+    posterior = datetime.datetime.strptime(fecha_final, "%d/%m/%Y")
+    # fecha_valida = None
 
-        annio = pedidos[i]['Año']
-
-        if annio == int(anio):
-            mes = pedidos[i]['Mes']
-
-            lista_m.append(mes)
-
-    print(lista_m)
-
-    if len(lista_m) > 0:
-
-        mes: int = int(input('Ingrese mes valido: '))
-
-        while mes not in lista_m:
-            print('noingresaste u mes valido')
-            mes: int = int(input('Ingrese mes valido: '))
-
-        for d in pedidos:
-            m = int(pedidos[d]['Mes'])
-            a = int(pedidos[d]['Año'])
-            c = int(pedidos[d]['Costo'])
-            if (m == int(mes)) and (a == int(anio)):
-                print(pedidos[d])
-                cantidad_pedidos += 1
-                suma += c
-
-        print('cqantidad de pedidos: ', cantidad_pedidos)
-        print('costo toal: ', suma)
+    if anterior.date() < posterior.date():
+        fecha_valida = True
 
     else:
+        fecha_valida = False
+        print("Fecha posterior menor a la fecha inicial")
 
-        print('no hay pedidos con ese annio')
-
-
-def imprimir_pedidos_ordenados_anio_mes(pedidos: dict):
-    # Año
-
-    lista_pedidos: list = []
-
-    for i in pedidos:
-        pedido = pedidos[i]
-        pedido['ID pedido'] = i
-        lista_pedidos.append(pedido)
-
-    lista_pedidos.sort(key=lambda p: p['Año'], reverse=False)
-
-    lista_pedidos.sort(key=lambda p: p['Mes'], reverse=False)
-
-    for linea in lista_pedidos:
-        print(linea)
+    return fecha_valida
 
 
-def organizar_categoria(pedidos: dict):
-    categorias: dict = {}
-    lista_categorias: list = []
+def ingreso_cliente(clientes: dict, planes: dict) -> dict:
+    agregar: str = 'si'
 
-    for i in pedidos:
-        categoria = pedidos[i]['Categoria']
-        costo = pedidos[i]['Costo']
-        cantidad = pedidos[i]['Cantidad']
+    while agregar == 'si':
 
-        costo_promedio = costo / cantidad
+        numeros = list(map(int, clientes.keys()))
+        if len(numeros) > 0:
+            numeros.sort()
+            numero_cliente: int = int(numeros[-1]) + 1
+        else:
+            numero_cliente = 1
 
-        categorias[i] = {'Categoria': categoria, 'Costo promedio POR ITEM': costo_promedio}
+        nombre: str = input('Ingrese el nombre del cliente: ')
+        fecha_alta: str = input("Ingrese fecha de alta (dd/mm/yyyyy): ")
+        while not validar_fecha(fecha_alta):
+            fecha_alta: str = input("Ingrese fecha de alta (dd/mm/yyyyy): ")
 
-    for i in categorias:
-        lista_categorias.append(categorias[i])
+        baja_dada: str = input("presione enter si no se dio baja, cualquier otra tecla para ingresar baja")
+        if baja_dada == '':
+            fecha_baja = '00/00/0000'
+        else:
+            fecha_baja: str = input("Ingrese fecha de baja (dd/mm/yyyyy): ")
+            while not validar_fecha_posterior(fecha_alta, fecha_baja):
+                fecha_baja: str = input("Ingrese fecha de baja (dd/mm/yyyyy): ")
+        for p in planes:
+            print(p)
+        plan: str = input('Ingrese el plan: ')
+        while plan not in planes:
+            plan: str = input("Ingrese plan): ")
 
-        lista_categorias.sort(key=lambda p: p['Categoria'], reverse=False)
+        with open("clientes.csv", "a") as archivo:
 
-    for linea in lista_categorias:
-        print(linea)
+            archivo.write(str(numero_cliente) + ', ' + nombre + ', ' + fecha_alta + ', ' + fecha_baja + ', ' + plan +
+                          '\n')
+
+        clientes[int(numero_cliente)] = {'Nombre': nombre, 'Alta': fecha_alta, 'Baja': fecha_baja, 'Plan': plan}
+
+        agregar = input("Quiere agregar otro cliente? Responda 'si' ó 'no': ")
+
+    return clientes
+
+
+def imprimir_cantidad_altas(clientes: dict):
+    cantidad_altas: int = 0
+    anio_ingresado: str = input("Ingrese anio: ")
+    while anio_ingresado == '%Y':
+        anio_ingresado: str = input("Ingrese anio (numero positivo): ")
+    mes_ingresado: str = input("Ingrese mes: ")
+    while mes_ingresado == '%m':
+        mes_ingresado: str = input("Ingrese mes (numero positivo): ")
+    if int(mes_ingresado) < 10:
+        mes_ingresado = mes_ingresado.zfill(2)
+
+    for i in clientes:
+        fecha = clientes[i]['Alta']
+        mes = fecha[4:6:]
+        anio = fecha[7:11]
+
+        if mes == mes_ingresado and anio == anio_ingresado:
+            print(mes, anio)
+            cantidad_altas += 1
+
+    print(cantidad_altas)
+
+
+def imprimir_ingresos_por_mes_anio(clientes: dict, planes: dict):
+    anio_ingresado: str = input("Ingrese anio: ")
+    monto_total: float = 0.0
+    descuento: float = 0.0
+    monto_final: float = 0.0
+    montos: list = [monto_total, descuento, monto_final]
+    while anio_ingresado == '%Y':
+        anio_ingresado: str = input("Ingrese anio (numero positivo): ")
+    dic_mes: dict = {1: montos, 2: montos, 3: montos, 4: montos, 5: montos, 6: montos, 7: montos, 8: montos, 9: montos,
+                     10: montos, 11: montos, 12: montos}
+    for i in range(1, 13):
+        for c in clientes:
+            fecha_baja = clientes[c]['Baja']
+            fecha_alta = clientes[c]['Alta']
+            mes_alta = fecha_alta[4:6:]
+            anio_alta = fecha_alta[7:11]
+            anio_baja = fecha_baja[7:11]
+            mes_baja = fecha_baja[4:6:]
+            plan = clientes[c]['Plan']
+            plan = plan[1:]
+            costo = planes[plan]
+
+            # verificar en que mes de ese anio comenzo a facturarse en ese anio pedido
+            if anio_alta == anio_ingresado:
+                # para verificar si ese mismo anio se les dio la baja y contar solo hasta el mes q se facturo
+                if (mes_baja == '00' and i >= int(mes_alta)) or (int(mes_alta) <= i <= int(mes_baja)):
+                    # para el anio de las promos
+                    if anio_alta == '2021':
+                        # si el mes de alta es enero o febrero y estan dentro de los meses validos de promo
+                        if (mes_alta == '01' and i <= 6) or (mes_alta == '02' and i <= 7):
+                            if plan == '100MB':
+                                descuento = costo * 0.15
+                                monto_total = costo
+                            elif plan == '1GB':
+                                descuento = costo * 0.20
+                                monto_total = costo
+                            # para los planes q no tienen promo
+                            else:
+                                monto_total = costo
+                                descuento = 0.0
+                                # print(clientes[c])
+                        # cuando se acaba la promo para los planes que tienen promo
+                        elif (mes_alta == '01' and i <= 12) or (mes_alta == '02' and i <= 12):
+                            monto_total = costo
+                            descuento = 0.0
+                            # print('se acabo el descuentico vale ')
+                            # print(clientes[c])
+                        # para el resto de los meses que no hay promo en ese anio
+                        else:
+                            monto_total = costo
+                            descuento = 0.0
+                            print(clientes[c])
+                    # para cualquier anio
+                    else:
+                        monto_total = costo
+                        descuento = 0.0
+                        # print(clientes[c])
+                    dic_mes[i] = [dic_mes[i][0] + monto_total, dic_mes[i][1] + descuento,
+                                  dic_mes[i][2] + (monto_total - descuento)]
+
+                elif (int(anio_baja) > int(anio_alta)) and (
+                        int(mes_alta) <= i) and mes_alta != '01' and mes_alta != '02':
+                    monto_total = costo
+                    descuento = 0.0
+                    print(clientes[c])
+                    dic_mes[i] = [dic_mes[i][0] + monto_total, dic_mes[i][1] + descuento,
+                                  dic_mes[i][2] + (monto_total - descuento)]
+            # para verificar que se cobra el plan dentro del anio pedido
+            elif int(anio_alta) <= int(anio_ingresado) and (
+                    (int(anio_baja) >= int(anio_ingresado)) or (anio_baja == '0000')):
+                print(clientes[c])
+                monto_total = costo
+                descuento = 0.0
+                dic_mes[i] = [dic_mes[i][0] + monto_total, dic_mes[i][1] + descuento,
+                              dic_mes[i][2] + (monto_total - descuento)]
+    for linea in dic_mes:
+        print(linea, dic_mes[linea])
+
+
+def cantidad_meses_entre_fechas(anio_posterior: str, mes_posterior: str, dia_posterior: str, anio_anterior: str,
+                                mes_anterior: str, dia_anterior: str) -> int:
+
+    fecha_final = datetime.datetime(int(anio_posterior), int(mes_posterior), int(dia_posterior))
+    fecha_inicial = datetime.datetime(int(anio_anterior), int(mes_anterior), int(dia_anterior))
+
+    cantidad_meses: int = (fecha_final.year - fecha_inicial.year) * 12 + (fecha_final.month - fecha_inicial.month)
+
+    return cantidad_meses
+
+
+def imprimir_top_tres(clientes: dict, planes: dict):
+    fecha_ingresada: str = input("Ingrese fecha (dd/mm/aaaa): ")
+    while fecha_ingresada == '%d/%m/%Y':
+        fecha_ingresada: str = input("Ingrese fecha dd/mm/aaaa ")
+
+    dia_ingresado = fecha_ingresada[0:2]
+    mes_ingresado = fecha_ingresada[3:5]
+    anio_ingresado = fecha_ingresada[6:]
+
+    for i in clientes:
+        fecha_baja = clientes[i]['Baja']
+        fecha_alta = clientes[i]['Alta']
+        dia_alta = fecha_alta[1:3:]
+        mes_alta = fecha_alta[4:6:]
+        anio_alta = fecha_alta[7:11]
+        dia_baja = fecha_baja[1:3:]
+        mes_baja = fecha_baja[4:6:]
+        anio_baja = fecha_baja[7:11]
+        plan = clientes[i]['Plan']
+        plan = plan[1:]
+        costo = planes[plan]
+        aporte = 0
+
+        if anio_baja == '0000' and int(anio_alta) <= int(anio_ingresado):
+            anio_baja = anio_ingresado
+            mes_baja = mes_ingresado
+            dia_baja = dia_ingresado
+
+        if int(anio_ingresado) < int(anio_alta):
+            aporte = 0
+
+        elif int(anio_ingresado) > int(anio_alta):
+
+            meses = cantidad_meses_entre_fechas(anio_baja, mes_baja, dia_baja, anio_alta, mes_alta, dia_alta)
+            meses = meses + 1
+            aporte = meses * costo
+
+            if anio_alta == '2021':
+
+                if(mes_alta == '01' or mes_alta == '02') and plan == '100MB':
+                    descuento = (costo * 0.85) * 6
+                    meses = meses - 6
+                    aporte = (meses * costo) + descuento
+                    print('hacer, descuentos 1', aporte)
+
+                elif (mes_alta == '01' or mes_alta == '02') and plan == '1GB':
+                    descuento = (costo * 0.85) * 6
+                    meses = meses - 6
+                    aporte = (meses * costo) + descuento
+                    print('hacer, descuentos 1', aporte)
+
+
+        elif int(anio_ingresado) == int(anio_alta):
+
+            if int(anio_baja) > int(anio_ingresado):
+                mes_baja = mes_ingresado
+                meses = cantidad_meses_entre_fechas(anio_ingresado, mes_ingresado, dia_ingresado, anio_alta, mes_alta,
+                                                    dia_alta)
+                meses = meses + 1
+                aporte = meses*costo
+
+            if int(mes_alta) <= int(mes_ingresado) <= int(mes_baja):
+
+                meses = cantidad_meses_entre_fechas(anio_ingresado, mes_ingresado, dia_ingresado, anio_alta, mes_alta,
+                                                    dia_alta)
+                meses = meses + 1
+                aporte = meses*costo
+
+            elif int(mes_alta) <= int(mes_ingresado):
+                meses = cantidad_meses_entre_fechas(anio_baja, mes_baja, dia_baja, anio_alta, mes_alta,
+                                                    dia_alta)
+                meses = meses + 1
+                aporte = meses*costo
+
+            elif int(mes_alta) >= int(mes_ingresado):
+                aporte = 0
+
+        clientes[i]['APORTES'] = aporte
+
+    lista_clientes: list = []
+
+    for id_cliente in clientes:
+
+        cliente = clientes[id_cliente]
+        cliente['ID'] = id_cliente
+        lista_clientes.append(cliente)
+
+    lista_clientes.sort(key=lambda p: p['APORTES'], reverse=True)
+
+    top_tres = lista_clientes[0:3]
+
+    for linea in top_tres:
+        if linea['APORTES'] > 0:
+            print(linea)
+        else:
+            print('no hay clientes para la fecha')
 
 
 def main():
-    pedidos = leer_pedidos('pedidos.csv')
-    # print(pedidos)
+    planes: dict = {'50MB': 1450, '100MB': 2100, '1GB': 4500}
+    clientes = leer_clientes('clientes.csv')
 
-    opciones: list = ["Poder agregar pedidos en el sistema y que queden almacenados",
-                      "Mostrar en pantalla la cantidad de pedidos y el costo total de un mes y año en particular ",
-                      "Imprimir en pantalla todos los pedidos ordenados de forma ascendente por año y mes, indicando "
-                      "Id, "
-                      "descripcion del pedido, costo total y costo promedio por item. ",
-                      "Mostrar las categorías ordenadas descendentemente por costo promedio por item indicando "
-                      "categoría "
-                      "y costo promedio por item ",
+    opciones: list = ["Permitir el ingreso de nuevos datos de clientes, ya sean actuales o históricos ",
+                      "Imprimir en pantalla la cantidad de clientes dados de alta en un mes y año en particular"
+                      "ingresado por el usuario",
+                      "Imprimir en pantalla el ingreso total $ de cada mes de un año ingresado por el usuario,"
+                      "discriminando el monto aplicado en descuentos. Se debe indicar mes, monto total,"
+                      "monto de descuento, monto final.",
+                      "Imprimir la información del top 3 de los clientes que más dinero han aportado a la"
+                      "empresa desde su ingreso y hasta una fecha de corte indicada por el usuario. Se debe"
+                      "indicar Id, Nombre y Apellido, Fecha de Alta, Fecha de Baja, Plan y Monto final ",
                       "Salir"]
     opcion: str = ''
 
@@ -189,37 +333,37 @@ def main():
 
         if opcion == '1':
 
-            pedidos = ingresar_pedidos(pedidos)
+            clientes = ingreso_cliente(clientes, planes)
 
         elif opcion == '2':
 
-            if len(pedidos) != 0:
+            if len(clientes) != 0:
 
-                mostrar_por_annio_mes(pedidos)
+                imprimir_cantidad_altas(clientes)
 
             else:
 
-                print('pedidos esta vacio')
+                print('el clientes esta vacio')
 
         elif opcion == '3':
 
-            if len(pedidos) != 0:
+            if len(clientes) != 0:
 
-                imprimir_pedidos_ordenados_anio_mes(pedidos)
+                imprimir_ingresos_por_mes_anio(clientes, planes)
 
             else:
 
-                print('pedidos esta vacio')
+                print('el clientes esta vacio')
 
         elif opcion == '4':
 
-            if len(pedidos) != 0:
+            if len(clientes) != 0:
 
-                organizar_categoria(pedidos)
+                imprimir_top_tres(clientes, planes)
 
             else:
 
-                print('pedidos esta vacio')
+                print('el clientes esta vacio')
 
         elif opcion == '5':
 
@@ -227,7 +371,7 @@ def main():
 
         else:
 
-            print("Las opciones deben ser entre 1 y 7")
+            print("Las opciones deben ser entre 1 y 5")
 
 
 main()
