@@ -21,10 +21,14 @@ def validar_numero(numero: str) -> bool:
 
 def main():
 
-    numero: str = input('Ingrese un numero: ')
+    numero: str = input('1. Ingrese un numero: ')
     while validar_numero(numero):
-        print("no ingresaste un numero entero positivo: ")
+        print("no ingresaste un numero entero: ")
         numero = input("Ingrese otro numero: ")
+    numero_entero_positivo: str = input('2. Ingrese un numero entero positivo: ')
+    while not numero_entero_positivo.isnumeric():
+        print("no ingresaste un numero entero positivo: ")
+        numero_entero_positivo = input("Ingrese otro numero: ")
     # print('cadena',numero)
     # print('int', int(numero))
     # print('float', float(numero))
