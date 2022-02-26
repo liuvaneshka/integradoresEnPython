@@ -104,16 +104,15 @@ def anio_ganancias(operaciones: list):
 
         ganancia = int(precio_venta) - int(costo_arreglo)
         incidencia = (op * 100) / cantidad_operaciones
-
+        
         if anio in diccionario:
-            for a in diccionario:
-                if a == anio:
-                    gan = diccionario[anio]['ganancia']
-                    op = diccionario[anio]['operaciones']
-                    op += 1
-                    ganancia = ganancia + gan
-                    incidencia = (op * 100) / cantidad_operaciones
-                    diccionario[anio] = {'ganancia': ganancia, 'incidencia': incidencia, 'operaciones': op}
+            gan = diccionario[anio]['ganancia']
+            op = diccionario[anio]['operaciones']
+            op += 1
+            ganancia = ganancia + gan
+            incidencia = (op * 100) / cantidad_operaciones
+            diccionario[anio] = {'ganancia': ganancia, 'incidencia': incidencia, 'operaciones': op}
+            # print(anio, diccionario[anio])
 
         elif anio not in diccionario:
 
@@ -156,13 +155,11 @@ def reporte_antiguedad(operaciones: list):
         antiguedad = int(anio_actual) - int(anio)
 
         if marca in antiguedades:
-            for a in antiguedades:
-                if a == marca:
-                    cantidad = antiguedades[a]['autos']
-                    antiguedad_anterior = antiguedades[a]['antiguedad']
-                    cantidad_autos = cantidad + 1
-                    antiguedad = antiguedad_anterior + antiguedad
-                    antiguedades[marca] = {'antiguedad': antiguedad, 'autos': cantidad_autos}
+            cantidad = antiguedades[a]['autos']
+            antiguedad_anterior = antiguedades[a]['antiguedad']
+            cantidad_autos = cantidad + 1
+            antiguedad = antiguedad_anterior + antiguedad
+            antiguedades[marca] = {'antiguedad': antiguedad, 'autos': cantidad_autos}
 
         elif marca not in antiguedades:
             antiguedades[marca] = {'antiguedad': antiguedad, 'autos': cantidad_autos}
@@ -198,15 +195,12 @@ def reporte_comisiones(operaciones: list):
             comision = ganancia * 0.1
 
         if empleado in comisiones:
+            monto_anterior = comisiones[empleado]['Monto']
+            cantidad_anterior = comisiones[empleado]['Cantidad de operaciones']
+            comision = comision + monto_anterior
+            cantidad_operaciones = cantidad_anterior + 1
 
-            for e in comisiones:
-                if e == empleado:
-                    monto_anterior = comisiones[empleado]['Monto']
-                    cantidad_anterior = comisiones[empleado]['Cantidad de operaciones']
-                    comision = comision + monto_anterior
-                    cantidad_operaciones = cantidad_anterior + 1
-
-                    comisiones[empleado] = {'Monto': comision, 'Cantidad de operaciones': cantidad_operaciones}
+            comisiones[empleado] = {'Monto': comision, 'Cantidad de operaciones': cantidad_operaciones}
 
         elif empleado not in comisiones:
 
