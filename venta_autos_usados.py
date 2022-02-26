@@ -155,11 +155,12 @@ def reporte_antiguedad(operaciones: list):
         antiguedad = int(anio_actual) - int(anio)
 
         if marca in antiguedades:
-            cantidad = antiguedades[a]['autos']
-            antiguedad_anterior = antiguedades[a]['antiguedad']
+            cantidad = antiguedades[marca]['autos']
+            antiguedad_anterior = antiguedades[marca]['antiguedad']
             cantidad_autos = cantidad + 1
             antiguedad = antiguedad_anterior + antiguedad
             antiguedades[marca] = {'antiguedad': antiguedad, 'autos': cantidad_autos}
+            # print(marca, antiguedades[marca])
 
         elif marca not in antiguedades:
             antiguedades[marca] = {'antiguedad': antiguedad, 'autos': cantidad_autos}
