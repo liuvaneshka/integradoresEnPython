@@ -18,10 +18,18 @@
         print(linea)
         
 """
-    #ordenar diccionario con solo valores
+    # ordenar diccionario con solo valores
     import operator
     ordenada = sorted(facturacion_periodo.items(), key=operator.itemgetter(1), reverse=True)
 
     for linea in ordenada:
         print(linea)
+"""
+
+"""
+    # ordenar por clave
+    # retorna una tupla
+    diccionario_items = diccionario.items()
+
+    items_ordenados = sorted(diccionario_items)
 """
